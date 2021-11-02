@@ -23,6 +23,8 @@ calculate_barrier.2d_matrix_landscape <- function(l, ...) {
 #' @param df A data frame for the variables. Use \code{print_template = TRUE} to get a template.
 #' @param print_template Print a template for \code{df}.
 #'
+#' @return A \code{barrier_grid_2d} object that specifies the condition for each barrier calculation.
+#'
 #' @export
 make_barrier_grid_2d <- function(vg, start_location_value = 0, start_r = 0.1, end_location_value = 0.7, end_r = 0.15, df = NULL, print_template = FALSE) {
   if (!"var_grid" %in% class(vg)) stop("`vg` should be a var_grid object")
@@ -54,6 +56,8 @@ make_barrier_grid_2d <- function(vg, start_location_value = 0, start_r = 0.1, en
 #' @param start_location_value,end_location_value The initial position (in value) for searching the start/end point.
 #' @param start_r,end_r The searching (L1) radius for searching the start/end point.
 #' @param base The base of the log function.
+#'
+#' @return A \code{barrier_2d_batch} object that contains the batch barrier calculation results.
 #'
 #' @export
 calculate_barrier_2d_batch <- function(l, bg = NULL, start_location_value = 0, start_r = 0.1, end_location_value = 0.7, end_r = 0.15, base = exp(1)) {
@@ -100,13 +104,13 @@ calculate_barrier_2d_batch <- function(l, bg = NULL, start_location_value = 0, s
 
   p <- ggplot2::ggplot() +
     ggplot2::labs(x = l$x, y = l$y) +
-    ggplot2::geom_point(data = point_all, ggplot2::aes(x = start_x, y = start_U)) +
-    ggplot2::geom_point(data = point_all, ggplot2::aes(x = end_x, y = end_U)) +
+    ggplot2::geom_point(data = point_all, ggplot2::aes(x = start_x, y = start_U), fill = "white", shape = 21) +
+    ggplot2::geom_point(data = point_all, ggplot2::aes(x = end_x, y = end_U), fill = "white", shape = 21) +
     ggplot2::geom_point(data = point_all, ggplot2::aes(x = saddle_x, y = saddle_U), color = "red")
 
   geom <- list(
-    ggplot2::geom_point(data = point_all, ggplot2::aes(x = start_x, y = start_U), color = "white"),
-    ggplot2::geom_point(data = point_all, ggplot2::aes(x = end_x, y = end_U), color = "white"),
+    ggplot2::geom_point(data = point_all, ggplot2::aes(x = start_x, y = start_U), fill = "white", shape = 21),
+    ggplot2::geom_point(data = point_all, ggplot2::aes(x = end_x, y = end_U), fill = "white", shape = 21),
     ggplot2::geom_point(data = point_all, ggplot2::aes(x = saddle_x, y = saddle_U), color = "red")
   )
   rows_labeller <- function(x) paste0(l$rows, ": ", x)
@@ -137,6 +141,8 @@ calculate_barrier_2d_batch <- function(l, bg = NULL, start_location_value = 0, s
 #' @param start_location_value,start_r,end_location_value,end_r Default values for finding local minimum. See \code{\link{calculate_barrier_3d_batch}}.
 #' @param df A data frame for the variables. Use \code{print_template = TRUE} to get a template.
 #' @param print_template Print a template for \code{df}.
+#'
+#' @return A \code{barrier_grid_3d} object that specifies the condition for each barrier calculation.
 #'
 #' @export
 make_barrier_grid_3d <- function(vg, start_location_value = c(0, 0), start_r = 0.1, end_location_value = c(0.7, 0.6), end_r = 0.15, df = NULL, print_template = FALSE) {
@@ -175,6 +181,8 @@ make_barrier_grid_3d <- function(vg, start_location_value = c(0, 0), start_r = 0
 #' @param expand If the values in the range all equal to \code{Umax}, expand the range or not?
 #' @param omit_unstable If a state is not stable (the "local minimum" overlaps with the saddle point), omit that state or not?
 #' @param base The base of the log function.
+#'
+#' @return A \code{barrier_3d_batch} object that contains the batch barrier calculation results.
 #'
 #' @export
 calculate_barrier_3d_batch <- function(l, bg = NULL, start_location_value = c(0, 0), start_r = 0.1, end_location_value = c(0.7, 0.6), end_r = 0.15, Umax, expand = TRUE, omit_unstable = FALSE, base = exp(1)) {

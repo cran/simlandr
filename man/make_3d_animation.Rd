@@ -22,7 +22,7 @@ make_3d_animation(
 \item{bs}{A \code{batch_simulation} object created by \code{\link{batch_simulation}.}}
 
 \item{x, y, fr}{The names of the target variables.
-\code{fr} corresponds to the \code{frame} parameter in plotly.}
+\code{fr} corresponds to the \code{frame} parameter in 'plotly'.}
 
 \item{Umax}{The maximum displayed value of potential.}
 
@@ -31,6 +31,9 @@ make_3d_animation(
 \item{individual_landscape}{Make individual landscape for each simulation?}
 
 \item{mat_3d}{Also make heatmap matrix?}
+}
+\value{
+A \code{3d_animation_landscape} object that describes the landscape of the system, including the smoothed distribution and the landscape plot.
 }
 \description{
 Make 3d animations from multiple simulations
