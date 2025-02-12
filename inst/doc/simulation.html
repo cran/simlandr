@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Jingmeng Cui" />
+
+
+<title>1. Dynamic models and simulations</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">1. Dynamic models and simulations</h1>
+<h4 class="author">Jingmeng Cui</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(simlandr)</span></code></pre></div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The whole story starts with a dynamic model.</p>
+<p>Formally speaking, a <strong>dynamic model</strong> is a set of
+equations that specify how all the variables of a system change over
+time. It usually takes the form of (stochastic) differential/difference
+equations.</p>
+<p>These dynamic models are rather abstract, so they can only be used
+for computation when they are implemented in a simulation function. A
+<strong>simulation function</strong> is a function that simulates how
+the model variables change over time. It takes some parameters as input
+and returns a recording of the simulation process.</p>
+<p>Currently, the whole package can only support the simulation function
+in a certain format. It should take (besides from other parameters)
+lists of model parameters as input, and give a matrix as the output. If
+your original simulation function is in another format, maybe some
+modification is needed.</p>
+<p>If the dynamic system takes a simpler form, you may also use the
+functions <code>sim_SDE()</code>. And you can use
+<code>multi_init_simulation()</code> to simulate the system from
+different initial points. We are still working on a concrete example
+with those functions. For now, please consult the documentation of the
+functions.</p>
+<p><code>simlandr</code> package provides a simulation function for a
+simple toy model, which is called <code>sim_fun_test()</code>. You can
+use this as an example of the correct function format. I will also use
+this function as an example throughout this vignette. It takes
+<code>arg1</code> and <code>arg2</code> as parameters: <code>arg1</code>
+should be a list containing <code>ele1</code> and <code>ele2</code>, and
+<code>arg2</code> should be a list containing <code>ele3</code>. It
+takes this nested structure because real-life functions often have a
+bunch of parameters in different categories (e.g., starting values,
+model parameters, parameters that control the behavior of the simulation
+function, etc.) To avoid confusion in terms, the package refers to these
+first-layer parameters as <em>arg</em>s and second-layer parameters as
+<em>ele</em>s.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>sim_fun_test</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; function (arg1, arg2, length = 1000) </span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;     output &lt;- matrix(nrow = length, ncol = 3)</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt;     colnames(output) &lt;- c(&quot;out1&quot;, &quot;out2&quot;, &quot;out3&quot;)</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt;     output[1, ] &lt;- c(arg1$ele1, arg2$ele2, rnorm(1, sd = 0.01))</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;     for (i in 2:length) {</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;         output[i, 1] &lt;- 0.5 * output[i - 1, 1] + output[i - 1, </span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;             2] + arg2$ele3 + arg1$ele1 * arg2$ele2</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;         output[i, 2] &lt;- -0.5 * output[i - 1, 1] + output[i - </span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt;             1, 2] + arg2$ele3</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt;         output[i, 3] &lt;- output[i - 1, 3] + rnorm(1, sd = 0.01)</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;     return(output)</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x00000211e1969e30&gt;</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:simlandr&gt;</span></span></code></pre></div>
+</div>
+<div id="single-simulation" class="section level1">
+<h1>Single simulation</h1>
+<p>For the author of a simulation function, running a single simulation
+is easy. You can just run the function normally, and assign the output
+to a variable. (If you are using others’ simulation functions, please
+read its documentation or ask the author about how to run it
+correctly.)</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>single_test <span class="ot">&lt;-</span> <span class="fu">sim_fun_test</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">arg1 =</span> <span class="fu">list</span>(<span class="at">ele1 =</span> <span class="dv">1</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">arg2 =</span> <span class="fu">list</span>(<span class="at">ele2 =</span> <span class="dv">1</span>, <span class="at">ele3 =</span> <span class="dv">0</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">head</span>(single_test)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;          out1     out2          out3</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; [1,]  1.00000  1.00000  0.0005880399</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; [2,]  2.50000  0.50000  0.0032868963</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; [3,]  2.75000 -0.75000 -0.0028583636</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; [4,]  1.62500 -2.12500 -0.0076126960</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; [5,] -0.31250 -2.93750 -0.0076988236</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; [6,] -2.09375 -2.78125  0.0013426807</span></span></code></pre></div>
+<p>For Monte-Carlo methods, it is important that the simulation
+<strong>converges</strong>. In our case, it means the distribution of
+the system is roughly stable. Only when the distribution estimation is
+good enough can we construct reasonable landscapes based on that.
+<code>simlandr</code> provides a function <code>check_conv()</code> to
+check if the simulation converges. It takes the initial, middle, and
+final parts of the simulation result and calculates distributions based
+on that. If these distributions look similar, we can say the simulation
+already converges. <em>A rare exception is that the simulation is so
+short or the noise of the system is so low that during the whole
+simulation the system is in one local stable state. A rough knowledge of
+the system would be enough to rule out this situation.</em></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">check_conv</span>(single_test, <span class="fu">c</span>(<span class="st">&quot;out1&quot;</span>, <span class="st">&quot;out2&quot;</span>, <span class="st">&quot;out3&quot;</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>#&gt; Press &lt;Enter&gt; to see the next plot...
+#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>#&gt; Press &lt;Enter&gt; to see the next plot...
+#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>#&gt; Press &lt;Enter&gt; to see the next plot...</code></pre>
+<p>From the plots, we can see that variables <code>out1</code> and
+<code>out2</code> have converged, but <code>out3</code> has not.
+However, as you might already realize, <code>out3</code> is basically a
+1d random walk process. Its distribution never converges (so it can
+provide a good example of non-convergence). Therefore, we will not
+extend the simulation length.</p>
+</div>
+<div id="out-of-memory-storage-of-the-simulation-output" class="section level1">
+<h1>Out-of-memory storage of the simulation output</h1>
+<p>Sometimes the output of the simulation is so large that it cannot be
+handled properly in the following computation. (Rule of thumb: retain
+matrices of &gt; 1 GB in memory is likely to produce future problems in
+a computer with 8 GB memory.) In this case, you can use the
+<code>bigmemory</code> package to put it into your hard drive.
+<code>bigmemory</code> only preserves a pointer in the memory, so it can
+save the memory space significantly. In most cases, you can treat it as
+a normal matrix. As far as I have tested, <code>simlandr</code> is fully
+compatible with <code>bigmemory</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># NOT RUN</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>single_test <span class="ot">&lt;-</span> bigmemory<span class="sc">::</span><span class="fu">as.big.matrix</span>(single_test, <span class="at">backingfile =</span> <span class="st">&quot;single_test.bin&quot;</span>, <span class="at">descriptorfile =</span> <span class="st">&quot;single_test.desc&quot;</span>)</span></code></pre></div>
+<p>The pointer only exists in a single session. In other words, if you
+close the session and reload the workspace image, the pointers will
+become <code>NULL</code>, and <code>bigmemory</code> attachment does not
+restore by itself. In order to use it again, use the following command
+to attach the file.</p>
+<p><em>To avoid compatibility problems, this vignette does not run
+out-of-memory related codes.</em></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># NOT RUN</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>single_test <span class="ot">&lt;-</span> bigmemory<span class="sc">::</span><span class="fu">attach.big.matrix</span>(<span class="st">&quot;single_test&quot;</span>)</span></code></pre></div>
+<hr />
+<p><strong>⚠ WARNING</strong></p>
+<p>Due to a bug of RStudio (<a href="https://github.com/rstudio/rstudio/issues/8923" class="uri">https://github.com/rstudio/rstudio/issues/8923</a>), its
+variable inspector cannot handle objects with null external pointers.
+Sometimes it results in a fatal error when loading workspace images with
+previous <code>bigmemory</code>-related objects.</p>
+<p>Current work-around before the bug is fixed:</p>
+<ol style="list-style-type: decimal">
+<li>Turn off “Restore .RData into workspace at startup” at Tools -&gt;
+Project Options -&gt; General</li>
+<li>Switch the variable inspector to “Manual Refresh Only”</li>
+<li>Load the workspace image</li>
+<li>Attach all <code>bigmemory</code>-related objects using
+<code>bigmemory::attach.big.matrix()</code>,
+<code>simlandr::attach_hash_big_matrix()</code> or
+<code>simlandr::attach_all_matrices()</code> (introduced later).</li>
+</ol>
+<p>After that, you can safely use/refresh the variable inspector.</p>
+<hr />
+<p>To reuse these images on a hard drive, <code>big.matrix</code> class
+in <code>bigmemory</code> requires an explicit file name for each
+matrix. This can be cumbersome if you need to handle a lot of matrices.
+(And this is even a bigger problem for batch simulation; see next
+section.) Therefore, <code>simlandr</code> provides a
+<code>hash-big.matrix</code> class to solve this problem. The
+<code>hash-big.matrix</code> class is a modification of
+<code>big.matrix</code> class in <code>big.memory</code> package, but it
+automatically generates the file names using the md5 values of the
+matrices. (For those who are not familiar with md5: it is a hash
+algorithm that can guarantee to give different names to different
+matrices in a reasonable simulation context.) The md5 value is also
+stored in the <code>md5</code> slot of <code>hash-big.matrix</code>
+objects. Therefore, the file link can also be restored automatically
+without having to specify a file name. By default, all the backing files
+of <code>hash-big.matrix</code> objects are in <code>\bp</code>
+directory.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># NOT RUN</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>single_test <span class="ot">&lt;-</span> <span class="fu">as_hash_big.matrix</span>(single_test)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>single_test <span class="ot">&lt;-</span> <span class="fu">attach_hash_big.matrix</span>(single_test)</span></code></pre></div>
+</div>
+<div id="batch-simulation" class="section level1">
+<h1>Batch simulation</h1>
+<p>Sometimes you need to simulate a set of models with different
+parameter values. <code>simlandr</code> provides several tools to do
+this easily.</p>
+<p>First, you need to make a <code>arg_grid</code> to specify the
+conditions of these simulations in terms of <code>arg</code> values. The
+following is an example.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="do">## Step 1: create a variable set</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>batch_test <span class="ot">&lt;-</span> <span class="fu">new_arg_set</span>()</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="do">## Step 2: add variable and its starting, end, and increment values of the sequence (passed to `seq()`) to the set.</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>batch_test <span class="ot">&lt;-</span> batch_test <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">add_arg_ele</span>(<span class="st">&quot;arg2&quot;</span>, <span class="st">&quot;ele3&quot;</span>, <span class="dv">0</span>, <span class="fl">0.5</span>, <span class="fl">0.1</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="do">## Step 3: make variable grids</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>batch_test_grid <span class="ot">&lt;-</span> <span class="fu">make_arg_grid</span>(batch_test)</span></code></pre></div>
+<p>Then you can run the batch simulation. <code>simlandr</code> use
+out-of-memory storage for batch simulations by default because most
+times batch simulation will result in very large data objects. In this
+case, each simulation result is stored in a separate file. Thanks to the
+<code>hash-big.matrix</code> class, you do not have to name each file by
+yourself.</p>
+<p><code>simlandr</code> also provides a
+<code>attach_all_matrices()</code> function to help you attach all the
+out-of-memory <code>hash-big.matrix</code>s related to a batch
+simulation. Use this if you want to load the previous workspace image
+with (out-of-memory) batch simulation results. Keep in mind that the
+<strong>WARNING</strong> above also holds for this.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># NOT RUN</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>batch_test_result <span class="ot">&lt;-</span> <span class="fu">batch_simulation</span>(batch_test_grid, sim_fun_test,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">default_list =</span> <span class="fu">list</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>    <span class="at">arg1 =</span> <span class="fu">list</span>(<span class="at">ele1 =</span> <span class="dv">0</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>    <span class="at">arg2 =</span> <span class="fu">list</span>(<span class="at">ele2 =</span> <span class="dv">0</span>, <span class="at">ele3 =</span> <span class="dv">0</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  ),</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  <span class="at">bigmemory =</span> <span class="cn">TRUE</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>batch_test_result <span class="ot">&lt;-</span> <span class="fu">attach_all_matrices</span>(batch_test_result)</span></code></pre></div>
+<p>If you want to keep all the original data in the memory, you can use
+<code>bigmemory = FALSE</code> to disable this.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>batch_test_result <span class="ot">&lt;-</span> <span class="fu">batch_simulation</span>(batch_test_grid, sim_fun_test,</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">default_list =</span> <span class="fu">list</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    <span class="at">arg1 =</span> <span class="fu">list</span>(<span class="at">ele1 =</span> <span class="dv">0</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>    <span class="at">arg2 =</span> <span class="fu">list</span>(<span class="at">ele2 =</span> <span class="dv">0</span>, <span class="at">ele3 =</span> <span class="dv">0</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  ),</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">bigmemory =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>)</span></code></pre></div>
+<p>The output of <code>batch_simulation()</code> function is a
+<code>batch_simulation</code> object, which is, basically, a complex
+<code>data.frame</code> with simulation outputs and corresponding
+parameter values. You can manipulate it as a <code>data.frame</code> for
+your purpose.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">print</span>(batch_test_result)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; Output(s) from 6 simulations.</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">print</span>(tibble<span class="sc">::</span><span class="fu">as_tibble</span>(batch_test_result))</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 3</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt;   ele_list        ele3 output           </span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt;   &lt;list&gt;         &lt;dbl&gt; &lt;list&gt;           </span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; 1 &lt;ele_list [1]&gt;   0   &lt;dbl [1,000 × 3]&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; 2 &lt;ele_list [1]&gt;   0.1 &lt;dbl [1,000 × 3]&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; 3 &lt;ele_list [1]&gt;   0.2 &lt;dbl [1,000 × 3]&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; 4 &lt;ele_list [1]&gt;   0.3 &lt;dbl [1,000 × 3]&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt; 5 &lt;ele_list [1]&gt;   0.4 &lt;dbl [1,000 × 3]&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; 6 &lt;ele_list [1]&gt;   0.5 &lt;dbl [1,000 × 3]&gt;</span></span></code></pre></div>
+<p><code>batch_simulation</code> objects are also the base for
+constructing landscapes from multiple simulations. See other vignettes
+for details.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
