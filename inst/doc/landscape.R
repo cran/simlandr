@@ -16,22 +16,22 @@ single_test <- sim_fun_test(
 
 ## -----------------------------------------------------------------------------
 l_single_2d <- make_2d_static(single_test, x = "out1")
-plot(l_single_2d)
+autoplot(l_single_2d)
 
 ## -----------------------------------------------------------------------------
 l_single_3d <- make_3d_static(single_test, x = "out1", y = "out2")
 
 ## ----eval=is_pkgdown----------------------------------------------------------
 # # This chunk will only run when building with pkgdown
-# plot(l_single_3d, 1)
+# plotly_ld(l_single_3d)
 
 ## -----------------------------------------------------------------------------
-plot(l_single_3d, 2)
+autoplot(l_single_3d)
 
 ## ----eval=is_pkgdown----------------------------------------------------------
 # # This chunk will only run when building with pkgdown
 # l_single_4d <- make_4d_static(single_test, x = "out1", y = "out2", z = "out3")
-# plot(l_single_4d) %>% plotly::layout(scene = list(zaxis = list(range = c(-3, 3))))
+# plotly_ld(l_single_4d) %>% plotly::layout(scene = list(zaxis = list(range = c(-3, 3))))
 
 ## -----------------------------------------------------------------------------
 batch_test <- new_arg_set()
@@ -67,21 +67,21 @@ batch_test_result2
 
 ## -----------------------------------------------------------------------------
 l_batch_2d_m1 <- make_2d_matrix(batch_test_result, x = "out1", cols = "ele3")
-plot(l_batch_2d_m1)
+autoplot(l_batch_2d_m1)
 
 l_batch_2d_m2 <- make_2d_matrix(batch_test_result2, x = "out1", rows = "ele1", cols = "ele2")
-plot(l_batch_2d_m2)
+autoplot(l_batch_2d_m2)
 
 ## -----------------------------------------------------------------------------
 l_batch_3d_m1 <- make_3d_matrix(batch_test_result, x = "out1", y = "out2", cols = "ele3")
-plot(l_batch_3d_m1)
+autoplot(l_batch_3d_m1)
 
 l_batch_3d_m2 <- make_3d_matrix(batch_test_result2, x = "out1", y = "out2", rows = "ele1", cols = "ele2")
-plot(l_batch_3d_m2)
+autoplot(l_batch_3d_m2)
 
 ## ----eval = FALSE-------------------------------------------------------------
 # l_batch_3d_a <- make_3d_animation(batch_test_result, x = "out1", y = "out2", fr = "ele3")
 # 
-# plot(l_batch_3d_a, 1)
-# plot(l_batch_3d_a, 2)
+# plotly_ld(l_batch_3d_a)
+# autoplot(l_batch_3d_a)
 

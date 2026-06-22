@@ -105,6 +105,21 @@ NULL_path <- function() {
   )
 }
 
+make_barrier_path_df <- function(min_path_index, dist, base) {
+  min_path_index %>%
+    unlist() %>%
+    matrix(ncol = 2, byrow = TRUE) %>%
+    as.data.frame() %>%
+    {
+      colnames(.) <- c("x_index", "y_index")
+      .
+    } %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(x_value = dist$x[x_index], y_value = dist$y[y_index]) %>%
+    dplyr::mutate(U = -log(dist$d[x_index, y_index], base = base)) %>%
+    dplyr::ungroup()
+}
+
 
 #' Find local minimum of a 3d distribution
 #'
@@ -118,7 +133,11 @@ NULL_path <- function() {
 #' @return A list with two elements: `U`, the potential value of the local minimum, and `location`, the position of the local minimum.
 #' @noRd
 find_local_min_3d <- function(dist, localmin, r, Umax, expand = TRUE, first_called = TRUE) {
-  if (!is.matrix(dist$d)) stop("Wrong input. `dist` should be a list with x, y, and d, and d should be a matrix.")
+  if (!is.matrix(dist$d)) {
+    cli::cli_abort(
+      "{.arg dist} must be a list with components {.field x}, {.field y}, and a matrix {.field d}."
+    )
+  }
   x1 <- localmin[1]
   y1 <- localmin[2]
   if (length(r) == 1) r <- rep(r, 2)
@@ -131,7 +150,9 @@ find_local_min_3d <- function(dist, localmin, r, Umax, expand = TRUE, first_call
 
   if (min_U > Umax) {
     if (expand) {
-      if (first_called) message("The U in this range is too high. Searching range expanded...")
+      if (first_called) {
+        cli::cli_alert_info("The potential in this range is too high. Expanding the search range.")
+      }
       return(find_local_min_3d(dist, localmin, c(r[1] + dist$x[2] - dist$x[1], r[2] + dist$y[2] - dist$y[1]), Umax, first_called = FALSE))
     } else {
       return(NULL_point())
@@ -141,22 +162,34 @@ find_local_min_3d <- function(dist, localmin, r, Umax, expand = TRUE, first_call
   location_value <- c(dist$x[location_index[1]], dist$y[location_index[2]])
   location <- c(location_index, location_value)
   names(location) <- c("x_index", "y_index", "x_value", "y_value")
-  if (!first_called) message(paste0("r = c(", r[1], ",", r[2], ")"))
+  if (!first_called) {
+    cli::cli_inform("Using {.code r = c({r[1]}, {r[2]})}.")
+  }
   return(list(U = min_U, location = location))
 }
 
+#' Shared 3D barrier core
+#'
+#' Internal helper used by `simlandr` and downstream packages to calculate barrier heights.
+#'
+#' @param d A distribution object with components `x`, `y`, and matrix `d`.
+#' @param x_label,y_label Axis labels for plotting.
+#' @inheritParams calculate_barrier
+#'
+#' @return A `3d_barrier` object.
 #' @export
-#' @rdname calculate_barrier
-calculate_barrier.3d_landscape <- function(l, start_location_value,
-                                           start_r,
-                                           end_location_value,
-                                           end_r,
-                                           Umax, expand = TRUE, omit_unstable = FALSE,
-                                           base = exp(1), ...) {
-  d <- l$dist
-
-  if (missing(Umax)) Umax <- l$Umax
-
+#' @keywords internal
+calculate_barrier_3d_core <- function(d,
+                                      x_label,
+                                      y_label,
+                                      start_location_value,
+                                      start_r,
+                                      end_location_value,
+                                      end_r,
+                                      Umax,
+                                      expand = TRUE,
+                                      omit_unstable = FALSE,
+                                      base = exp(1)) {
   local_min_start <- find_local_min_3d(d, start_location_value, start_r, Umax, expand = expand)
   local_min_end <- find_local_min_3d(d, end_location_value, end_r, Umax, expand = expand)
 
@@ -170,18 +203,7 @@ calculate_barrier.3d_landscape <- function(l, start_location_value,
       local_min_end$location[1:2]
     )
 
-    min_path <- min_path_index %>%
-      unlist() %>%
-      matrix(ncol = 2, byrow = TRUE) %>%
-      as.data.frame() %>%
-      {
-        colnames(.) <- c("x_index", "y_index")
-        .
-      } %>%
-      dplyr::rowwise() %>%
-      dplyr::mutate(x_value = d$x[x_index], y_value = d$y[y_index]) %>%
-      dplyr::mutate(U = -log(d$d[x_index, y_index], base = base)) %>%
-      dplyr::ungroup()
+    min_path <- make_barrier_path_df(min_path_index, d, base)
 
     s_U <- max(min_path$U)
     s_location_path_index <- as.integer(stats::median(which(min_path$U == s_U)))
@@ -205,13 +227,13 @@ calculate_barrier.3d_landscape <- function(l, start_location_value,
     }
   }
 
-
   p <- ggplot2::ggplot() +
     ggplot2::geom_path(data = min_path, mapping = ggplot2::aes(x = x_value, y = y_value)) +
     ggplot2::geom_point(ggplot2::aes(x = local_min_start$location["x_value"], y = local_min_start$location["y_value"]), color = "black") +
     ggplot2::geom_point(ggplot2::aes(x = local_min_end$location["x_value"], y = local_min_end$location["y_value"]), color = "black") +
     ggplot2::geom_point(ggplot2::aes(x = saddle_point$location["x_value"], y = saddle_point$location["y_value"]), color = "red") +
-    ggplot2::labs(x = l$x, y = l$y)
+    ggplot2::labs(x = x_label, y = y_label)
+
   result <- list(
     local_min_start = local_min_start,
     local_min_end = local_min_end,
@@ -226,10 +248,37 @@ calculate_barrier.3d_landscape <- function(l, start_location_value,
       ggplot2::geom_point(ggplot2::aes(x = local_min_end$location["x_value"], y = local_min_end$location["y_value"]), color = "white"),
       ggplot2::geom_point(ggplot2::aes(x = saddle_point$location["x_value"], y = saddle_point$location["y_value"]), color = "red")
     ),
-    x = l$x, y = l$y, Umax = l$Umax
+    x = x_label,
+    y = y_label,
+    Umax = Umax
   )
   class(result) <- c("3d_barrier", "barrier")
-  return(result)
+  result
+}
+
+#' @export
+#' @rdname calculate_barrier
+calculate_barrier.3d_landscape <- function(l, start_location_value,
+                                           start_r,
+                                           end_location_value,
+                                           end_r,
+                                           Umax, expand = TRUE, omit_unstable = FALSE,
+                                           base = exp(1), ...) {
+  if (missing(Umax)) Umax <- l$Umax
+
+  calculate_barrier_3d_core(
+    d = l$dist,
+    x_label = l$x,
+    y_label = l$y,
+    start_location_value = start_location_value,
+    start_r = start_r,
+    end_location_value = end_location_value,
+    end_r = end_r,
+    Umax = Umax,
+    expand = expand,
+    omit_unstable = omit_unstable,
+    base = base
+  )
 }
 
 
